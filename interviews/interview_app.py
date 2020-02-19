@@ -2,7 +2,10 @@ from SetupDb import db_session
 import SetupDb
 from Model import Interview
 import datetime
-
+import datetime
+from datetime import datetime
+from datetime import datetime, timedelta
+from datetime import datetime
 from flask import Flask
 from flask import request
 from flask import jsonify
@@ -30,6 +33,26 @@ def get_interviews():
 @app.route('/interviews/<id>')
 def get_interview(id):
     return jsonify(db_session.query(Interview).get(id).serialize())
+
+@app.route('/interviews/candidate/<id>')
+def get_interview_by_candidate_id(id):
+    result = db_session.query(Interview).filter(Interview.job_has_candidate_id == id)
+    candidate_list = []
+    for value in result:
+        candidate_list.append(value.serialize())
+    return jsonify(candidate_list)
+
+
+@app.route('/interviews/days/<days>')
+def get_interview_by_date(days):
+    current_date = datetime.now()
+    search_date = datetime.now() + timedelta(days=int(days))
+    results = db_session.query(Interview).filter(Interview.schedule_time.between(current_date, search_date))
+    date_list = []
+    for value in results:
+        date_list.append(value.serialize())
+    return jsonify(date_list)
+
 
 @app.route('/interviews/<id>', methods = ['DELETE'])
 def delete_interview(id):
